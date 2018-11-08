@@ -25,12 +25,14 @@ def main():
     log_name = datetime.datetime.now().strftime('./log/train-%Y%m%d-%H%M%S.log')
     with open(log_name, mode='w', encoding='utf-8') as wp:
         epoch_loss_list = []
-        for epoch in range(500):  # データセットに渡り複数回ループ
+        for epoch in range(1):  # データセットに渡り複数回ループ
 
             # データ全てのトータルロス
             epoch_loss = 0.0
 
+            print(len(dataloader))
             for i, data in enumerate(dataloader):
+                print(i)
                 inputs, labels = data
 
                 temp = []
@@ -72,7 +74,7 @@ class MyDataset(torch.utils.data.Dataset):
         assert len(data) == len(tags)
         # npに変換し、0埋めを行う
         max_length = max([len(d) for d in data])
-        self.data = np.zeros((len(tags), max_length, len(data[0][0])))
+        self.data = np.zeros((len(tags), max_length, 1))
         for i, d1 in enumerate(data):
             for l, d2 in enumerate(d1):
                 self.data[i][l] = d2
@@ -119,6 +121,6 @@ class LSTM(nn.Module):
 
 if __name__ == '__main__':
     NpzFile = np.load('./data/feature.npz')
-    train = NpzFile['elmo']
-    trainTag = NpzFile['tags']
+    train = NpzFile['elmo'].tolist()
+    trainTag = NpzFile['tags'].tolist()
     main()

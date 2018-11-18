@@ -93,10 +93,9 @@ def main():
 def create_model(input_size):
     model = Sequential()
     model.add(LSTM(100, batch_input_shape=(None, 1, input_size), return_sequences=False))
-    model.add(Dense(80))
     model.add(Dense(40))
     model.add(Dense(2))
-    model.add(Activation("relu"))
+    # model.add(Activation("relu"))
     # optimizer = Adam(lr=0.001)
     optimizer = Adam(lr=0.01)
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['acc'])

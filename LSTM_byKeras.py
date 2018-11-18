@@ -92,7 +92,7 @@ def main():
 
 def create_model(input_size):
     model = Sequential()
-    model.add(LSTM(100, batch_input_shape=(None, 1, input_size), return_sequences=False, unroll=True))
+    model.add(LSTM(100, batch_input_shape=(None, 1, input_size), return_sequences=False))
     model.add(Dense(80))
     model.add(Dense(40))
     model.add(Dense(2))

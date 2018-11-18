@@ -47,28 +47,29 @@ def main():
     test5 = pad_sequences(test_sequences, mean_length, padding='post').reshape(tests_length, 1, mean_length)
     test6 = pad_sequences(test_sequences, middle_length, padding='post').reshape(tests_length, 1, middle_length)
 
+    epochs = 1
     model = create_model(train1.shape[2])
-    model.fit(train1, labels, epochs=5)
+    model.fit(train1, labels, epochs=epochs)
     result1 = model.predict(test1)
 
     model = create_model(train2.shape[2])
-    model.fit(train2, labels, epochs=5)
+    model.fit(train2, labels, epochs=epochs)
     result2 = model.predict(test2)
 
     model = create_model(train3.shape[2])
-    model.fit(train3, labels, epochs=5)
+    model.fit(train3, labels, epochs=epochs)
     result3 = model.predict(test3)
 
     model = create_model(train4.shape[2])
-    model.fit(train4, labels, epochs=5)
+    model.fit(train4, labels, epochs=epochs)
     result4 = model.predict(test4)
 
     model = create_model(train5.shape[2])
-    model.fit(train5, labels, epochs=5)
+    model.fit(train5, labels, epochs=epochs)
     result5 = model.predict(test5)
 
     model = create_model(train6.shape[2])
-    model.fit(train6, labels, epochs=5)
+    model.fit(train6, labels, epochs=epochs)
     result6 = model.predict(test6)
 
     results = (result1 + result2 + result3 + result4 + result5 + result6) / 6
@@ -91,11 +92,13 @@ def main():
 
 def create_model(input_size):
     model = Sequential()
-    model.add(LSTM(128, batch_input_shape=(None, 1, input_size), return_sequences=False))
+    model.add(LSTM(100, batch_input_shape=(None, 1, input_size), return_sequences=False, unroll=True))
+    model.add(Dense(80))
     model.add(Dense(40))
     model.add(Dense(2))
-    model.add(Activation("linear"))
-    optimizer = Adam(lr=0.001)
+    model.add(Activation("relu"))
+    # optimizer = Adam(lr=0.001)
+    optimizer = Adam(lr=0.01)
     model.compile(loss="categorical_crossentropy", optimizer=optimizer, metrics=['acc'])
     return model
 

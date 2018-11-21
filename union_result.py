@@ -12,7 +12,7 @@ def main():
     results = []
     for input_file in args.input_files:
         with open(input_file) as p:
-            results.append([result.strip() for result in p])
+            results.append([int(result.strip()) for result in p])
 
     with open('union_output', mode='w') as p:
         union_results = [int(any(results)) for results in np.transpose(results)]

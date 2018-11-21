@@ -4,27 +4,15 @@ from argparse import ArgumentParser
 import pickle
 
 import numpy as np
-from statistics import mean
-
-from keras.models import Sequential
-from keras.layers import Dense, LSTM, Activation, LeakyReLU, ThresholdedReLU
 from keras.preprocessing.sequence import pad_sequences
-from keras.optimizers import Adam, SGD, RMSprop, Adagrad, Adadelta, Adamax, Nadam
-from keras_preprocessing.text import tokenizer_from_json
-# from keras.utils import plot_model
-
 from keras.models import load_model
-
-import keras.backend as K
-from sklearn.datasets import load_svmlight_files
-from keras.models import model_from_json
 
 
 def main():
     with open(args.tokenizer, 'rb') as p:
         tokenizer = pickle.load(p)
 
-    model = load_model(args.model)
+    model = load_model(args.model, compile=False)
     max_length = model.get_config()['layers'][0]['config']['batch_input_shape'][2]
 
     npz = np.load(args.npz_test_file)

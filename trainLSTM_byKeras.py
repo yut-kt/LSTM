@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser
-import numpy as np
+import pickle
 
+import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Activation, ThresholdedReLU
 from keras.preprocessing.sequence import pad_sequences
@@ -16,8 +17,9 @@ def main():
 
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(train_sentences)
-    with open(f'{args.tokenizer_name}.json', mode='w') as p:
-        p.write(tokenizer.to_json(indent=2))
+
+    with open(f'{args.tokenizer_name}.pkl', 'wb') as p:
+        pickle.dump(tokenizer, p, protocol=pickle.HIGHEST_PROTOCOL)
 
     sequences = tokenizer.texts_to_sequences(train_sentences)
     max_length = max([len(sentence) for sentence in train_sentences])
@@ -68,8 +70,8 @@ def create_model(input_size):
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='LSTM by Keras')
-    parser.add_argument('-tr', '--npz_train_file', help='学習npzファイル', required=True)
+    parser.add_argument('-npz', '--npz_train_file', help='学習npzファイル', required=True)
     parser.add_argument('-m', '--model_name', help='モデルの保存名', default='model')
-    parser.add_argument('-to', '--tokenizer_name', help='Tokenizerの保存名', default='tokenizer')
+    parser.add_argument('-t', '--tokenizer_name', help='Tokenizerの保存名', default='tokenizer')
     args = parser.parse_args()
     main()

@@ -17,7 +17,7 @@ def main():
     np.savez(file_path, sentences=sentences, labels=labels)
 
 
-def get_labels_sentences() -> Union[Iterator[Any]]:
+def get_labels_sentences():
     """
     ファイルを読み込んでラベルと文に分割
     :return: ラベル配列と文配列のタプル
@@ -29,15 +29,15 @@ def get_labels_sentences() -> Union[Iterator[Any]]:
         ])
 
 
-def get_word_strList(sentences: str) -> List[str]:
+def get_word_strList(sentences):
     """
     文配列から分ち書きした文配列へ変換
     :param sentences: 文配列
     :return: 分ち書きした文配列
     """
 
-    def get_word_str(sentence: str) -> str:
-        def validate(word_line: str) -> None | str:
+    def get_word_str(sentence):
+        def validate(word_line):
             if word_line.strip() == 'EOS' or word_line == '':
                 return
             word, info = word_line.split('\t')

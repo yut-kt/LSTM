@@ -24,8 +24,10 @@ def main():
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
     model = KerasClassifier(build_fn=create_model)
-    grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), n_jobs=-1, cv=3)
+    grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), cv=3)
     grid = grid.fit(train, labels)
+
+    print(grid.best_params_)
 
     npz = np.load(args.npz_test_file)
     test_sentences = npz['sentences']
@@ -35,10 +37,8 @@ def main():
     test = pad_sequences(test_sequences, max_length, padding='pre').reshape(tests_length, 1, max_length)
     test_labels = [label.argmax() for label in test_labels]
 
-    print(grid.best_params_)
-    print(grid.cv_results_)
 
-    results = [result.argmax() for result in model.predict(test)]
+    results = [result.argmax() for result in grid.predict(test)]
 
     pre_list = [x == int(y) for x, y in zip(test_labels, results) if y == 1 or y == '1']
     rec_list = [x == int(y) for x, y in zip(test_labels, results) if x == 1 or x == '1']
@@ -100,7 +100,7 @@ def create_model():
 
 def create_param_grid():
     epochs = [5]
-    batch_size = [80, 100, 120]
+    batch_size = [60, 70, 80]
     return dict(
         epochs=epochs,
         batch_size=batch_size,

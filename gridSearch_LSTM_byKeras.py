@@ -54,7 +54,7 @@ def main():
     recall = len(list(filter(bool, rec_list))) / len(rec_list) if rec_list else 0
     recall_round = Decimal(str(recall * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-    f_measure = 2 * precision * recall / (precision + recall)
+    f_measure = 2 * precision * recall / (precision + recall) if precision + recall != 0 else 0
     f_measure_round = Decimal(str(f_measure * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     print('---------- Evaluation ----------')

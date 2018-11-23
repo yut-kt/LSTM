@@ -23,7 +23,7 @@ def main():
     max_length = max([len(sentence) for sentence in train_sentences])
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
-    model = KerasClassifier(build_fn=create_model, verbose=0)
+    model = KerasClassifier(build_fn=create_model, epochs=3, verbose=0)
     grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), cv=3)
     grid = grid.fit(train, labels)
 
@@ -64,32 +64,36 @@ def main():
     print('--------------------------------')
 
 
-def create_model():
+def create_model(recurrent_activation1='hard_sigmoid',
+                 recurrent_activation2='hard_sigmoid',
+                 recurrent_activation3='hard_sigmoid',
+                 recurrent_activation4='hard_sigmoid',
+                 optimizer='RMSprop'):
     input_size = 644
     model = Sequential()
     model.add(
         LSTM(200,
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
-             recurrent_activation='hard_sigmoid',
+             recurrent_activation=recurrent_activation1,
              return_sequences=True))
     model.add(
         LSTM(100,
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
-             recurrent_activation='hard_sigmoid',
+             recurrent_activation=recurrent_activation2,
              return_sequences=True))
     model.add(
         LSTM(80,
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
-             recurrent_activation='hard_sigmoid',
+             recurrent_activation=recurrent_activation3,
              return_sequences=True))
     model.add(
         LSTM(60,
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
-             recurrent_activation='hard_sigmoid',
+             recurrent_activation=recurrent_activation4,
              return_sequences=False))
     model.add(Dense(60))
     model.add(Activation('softplus'))
@@ -99,16 +103,14 @@ def create_model():
     model.add(Activation('sigmoid'))
     model.add(Dense(2))
     model.add(Activation('hard_sigmoid'))
-    model.compile(loss='cosine_proximity', optimizer=RMSprop(), metrics=['acc'])
+    model.compile(loss='cosine_proximity', optimizer=optimizer, metrics=['acc'])
     return model
 
 
 def create_param_grid():
-    epochs = [5]
-    batch_size = [60, 70, 80]
+    optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam']
     return dict(
-        epochs=epochs,
-        batch_size=batch_size,
+        optimizer=optimizer,
     )
 
 

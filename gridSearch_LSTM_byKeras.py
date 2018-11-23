@@ -23,7 +23,7 @@ def main():
     max_length = max([len(sentence) for sentence in train_sentences])
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
-    model = KerasClassifier(build_fn=create_model(train.shape[2]))
+    model = KerasClassifier(build_fn=create_model)
     grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), n_jobs=-1, cv=3)
     grid = grid.fit(train, labels)
 
@@ -59,7 +59,8 @@ def main():
     print('--------------------------------')
 
 
-def create_model(input_size):
+def create_model():
+    input_size = 644
     model = Sequential()
     model.add(
         LSTM(200,

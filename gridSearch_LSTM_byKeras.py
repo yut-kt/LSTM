@@ -23,11 +23,17 @@ def main():
     max_length = max([len(sentence) for sentence in train_sentences])
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
-    model = KerasClassifier(build_fn=create_model)
+    model = KerasClassifier(build_fn=create_model, verbose=0)
     grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), cv=3)
     grid = grid.fit(train, labels)
 
     print(grid.best_params_)
+    print()
+    means = grid.cv_results_['mean_test_score']
+    stds = grid.cv_results_['std_test_score']
+    params = grid.cv_results_['params']
+    for mean, stdev, param in zip(means, stds, params):
+        print("%f (%f) with: %r" % (mean, stdev, param))
 
     npz = np.load(args.npz_test_file)
     test_sentences = npz['sentences']
@@ -36,7 +42,6 @@ def main():
     test_sequences = tokenizer.texts_to_sequences(test_sentences)
     test = pad_sequences(test_sequences, max_length, padding='pre').reshape(tests_length, 1, max_length)
     test_labels = [label.argmax() for label in test_labels]
-
 
     results = [result.argmax() for result in grid.predict(test)]
 

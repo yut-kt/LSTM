@@ -49,11 +49,7 @@ def main():
     print(f'{"precision":<9}：{f"{len(list(filter(bool, pre_list)))} / {len(pre_list)}":<9} = {precision_round}%')
     print(f'{"recall":<9}：{f"{len(list(filter(bool, rec_list)))} / {len(rec_list)}":<9} = {recall_round}%')
     print(f'{"F-measure":<9}：{"2pr/(p+r)":<9} = {f_measure_round}%')
-
-    print('f:', f)
-    print('precision:', precision)
-    print('recall', recall)
-    print('---------- ----------')
+    print('--------------------------------')
 
 
 if __name__ == '__main__':

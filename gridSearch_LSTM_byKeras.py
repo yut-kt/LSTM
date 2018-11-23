@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser
-import pickle
+from decimal import Decimal, ROUND_HALF_UP
 
 import numpy as np
 from keras.models import Sequential
@@ -24,11 +24,39 @@ def main():
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
     model = KerasClassifier(build_fn=create_model(train.shape[2]))
-    grid = GridSearchCV(estimator=model, param_grid=create_param_grid())
-    grid_result = grid.fit(train, labels)
+    grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), n_jobs=-1, cv=3)
+    grid = grid.fit(train, labels)
 
-    print(grid_result.best_params_)
-    print(grid_result.cv_results_)
+    npz = np.load(args.npz_test_file)
+    test_sentences = npz['sentences']
+    tests_length = len(test_sentences)
+    test_labels = npz['labels']
+    test_sequences = tokenizer.texts_to_sequences(test_sentences)
+    test = pad_sequences(test_sequences, max_length, padding='pre').reshape(tests_length, 1, max_length)
+    test_labels = [label.argmax() for label in test_labels]
+
+    print(grid.best_params_)
+    print(grid.cv_results_)
+
+    results = [result.argmax() for result in model.predict(test)]
+
+    pre_list = [x == int(y) for x, y in zip(test_labels, results) if y == 1 or y == '1']
+    rec_list = [x == int(y) for x, y in zip(test_labels, results) if x == 1 or x == '1']
+
+    precision = len(list(filter(bool, pre_list))) / len(pre_list) if pre_list else 0
+    precision_round = Decimal(str(precision * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    recall = len(list(filter(bool, rec_list))) / len(rec_list) if rec_list else 0
+    recall_round = Decimal(str(recall * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    f_measure = 2 * precision * recall / (precision + recall)
+    f_measure_round = Decimal(str(f_measure * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    print('---------- Evaluation ----------')
+    print(f'{"precision":<9}：{f"{len(list(filter(bool, pre_list)))} / {len(pre_list)}":<9} = {precision_round}%')
+    print(f'{"recall":<9}：{f"{len(list(filter(bool, rec_list)))} / {len(rec_list)}":<9} = {recall_round}%')
+    print(f'{"F-measure":<9}：{"2pr/(p+r)":<9} = {f_measure_round}%')
+    print('--------------------------------')
 
 
 def create_model(input_size):
@@ -70,8 +98,8 @@ def create_model(input_size):
 
 
 def create_param_grid():
-    epochs = [1, 3, 5]
-    batch_size = [100, 200, 300]
+    epochs = [5]
+    batch_size = [80, 100, 120]
     return dict(
         epochs=epochs,
         batch_size=batch_size,
@@ -81,5 +109,6 @@ def create_param_grid():
 if __name__ == '__main__':
     parser = ArgumentParser(description='LSTM by Keras')
     parser.add_argument('-npz', '--npz_train_file', help='学習npzファイル', required=True)
+    parser.add_argument('-npz', '--npz_test_file', help='テストnpzファイル', required=True)
     args = parser.parse_args()
     main()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 from argparse import ArgumentParser
+from decimal import Decimal, ROUND_HALF_UP
 
 
 def main():
@@ -12,12 +12,19 @@ def main():
         rec_list = [x == y for x, y in zip(a, i) if x.strip() == '1']
 
         precision = len(list(filter(bool, pre_list))) / len(pre_list) if pre_list else 0
-        recall = len(list(filter(bool, rec_list))) / len(rec_list) if rec_list else 0
+        precision_round = Decimal(str(precision * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        print(f'精度：{len(list(filter(bool, pre_list)))} / {len(pre_list)} = {precision*100}%')
-        print(f'再現率：{len(list(filter(bool, rec_list)))} / {len(rec_list)} = {recall*100}%')
-        print(f'F値：{2*precision*recall/(precision+recall)*100}%')
-        print('---------- ----------')
+        recall = len(list(filter(bool, rec_list))) / len(rec_list) if rec_list else 0
+        recall_round = Decimal(str(recall * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        f_measure = 2 * precision * recall / (precision + recall)
+        f_measure_round = Decimal(str(f_measure * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        print('---------- Evaluation ----------')
+        print(f'{"precision":<9}：{f"{len(list(filter(bool, pre_list)))} / {len(pre_list)}":<9} = {precision_round}%')
+        print(f'{"recall":<9}：{f"{len(list(filter(bool, rec_list)))} / {len(rec_list)}":<9} = {recall_round}%')
+        print(f'{"F-measure":<9}：{"2pr/(p+r)":<9} = {f_measure_round}%')
+        print('--------------------------------')
 
 
 if __name__ == '__main__':

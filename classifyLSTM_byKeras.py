@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 import pickle
+from decimal import Decimal, ROUND_HALF_UP
 
 import numpy as np
 from keras.preprocessing.sequence import pad_sequences
@@ -32,13 +33,23 @@ def main():
         for result in results:
             p.write(f'{result}\n')
 
-    f_list = [x == int(y) for x, y in zip(test_labels, results)]
     pre_list = [x == int(y) for x, y in zip(test_labels, results) if y == 1 or y == '1']
     rec_list = [x == int(y) for x, y in zip(test_labels, results) if x == 1 or x == '1']
 
-    f = len(list(filter(bool, f_list))) / len(f_list) * 100
-    precision = len(list(filter(bool, pre_list))) / len(pre_list) * 100 if pre_list else 0
-    recall = len(list(filter(bool, rec_list))) / len(rec_list) * 100 if rec_list else 0
+    precision = len(list(filter(bool, pre_list))) / len(pre_list) if pre_list else 0
+    precision_round = Decimal(str(precision * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    recall = len(list(filter(bool, rec_list))) / len(rec_list) if rec_list else 0
+    recall_round = Decimal(str(recall * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    f_measure = 2 * precision * recall / (precision + recall)
+    f_measure_round = Decimal(str(f_measure * 100)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    print('---------- Evaluation ----------')
+    print(f'{"precision":<9}：{f"{len(list(filter(bool, pre_list)))} / {len(pre_list)}":<9} = {precision_round}%')
+    print(f'{"recall":<9}：{f"{len(list(filter(bool, rec_list)))} / {len(rec_list)}":<9} = {recall_round}%')
+    print(f'{"F-measure":<9}：{"2pr/(p+r)":<9} = {f_measure_round}%')
+
     print('f:', f)
     print('precision:', precision)
     print('recall', recall)

@@ -7,10 +7,13 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Activation, ThresholdedReLU
 from keras.preprocessing.sequence import pad_sequences
-from keras.optimizers import RMSprop
 from keras.preprocessing.text import Tokenizer
+
+# Grid Search
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
+
+from keras.optimizers import *
 from keras.initializers import *
 
 
@@ -38,21 +41,21 @@ def main():
 
 
 def create_model(kernel_initializer1=glorot_uniform(),
-                 kernel_initializer2='glorot_uniform',
-                 kernel_initializer3='glorot_uniform',
-                 kernel_initializer4='glorot_uniform',
-                 kernel_initializer5='glorot_uniform',
-                 kernel_initializer6='glorot_uniform',
-                 kernel_initializer7='glorot_uniform',
-                 kernel_initializer8='glorot_uniform',
+                 kernel_initializer2=glorot_uniform(),
+                 kernel_initializer3=glorot_uniform(),
+                 kernel_initializer4=glorot_uniform(),
+                 kernel_initializer5=glorot_uniform(),
+                 kernel_initializer6=glorot_uniform(),
+                 kernel_initializer7=glorot_uniform(),
+                 kernel_initializer8=glorot_uniform(),
 
                  recurrent_activation1='hard_sigmoid',
                  recurrent_activation2='hard_sigmoid',
                  recurrent_activation3='hard_sigmoid',
                  recurrent_activation4='hard_sigmoid',
 
-                 optimizer='RMSprop',
-                 lr=0.001,
+                 optimizer=RMSprop(),
+                 lr=0.01,
                  rho=0.9):
     input_size = 644
     model = Sequential()
@@ -68,29 +71,32 @@ def create_model(kernel_initializer1=glorot_uniform(),
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
              recurrent_activation=recurrent_activation2,
+             kernel_initializer=kernel_initializer2,
              return_sequences=True))
     model.add(
         LSTM(80,
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
              recurrent_activation=recurrent_activation3,
+             kernel_initializer=kernel_initializer3,
              return_sequences=True))
     model.add(
         LSTM(60,
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
              recurrent_activation=recurrent_activation4,
+             kernel_initializer=kernel_initializer4,
              return_sequences=False))
-    model.add(Dense(60))
+    model.add(Dense(60, kernel_initializer=kernel_initializer5))
     model.add(Activation('softplus'))
-    model.add(Dense(40))
+    model.add(Dense(40, kernel_initializer=kernel_initializer6))
     model.add(ThresholdedReLU())
-    model.add(Dense(20))
+    model.add(Dense(20, kernel_initializer=kernel_initializer7))
     model.add(Activation('sigmoid'))
-    model.add(Dense(2))
+    model.add(Dense(2, kernel_initializer=kernel_initializer8))
     model.add(Activation('hard_sigmoid'))
 
-    if optimizer == 'RMSProp':
+    if isinstance(optimizer, RMSprop):
         optimizer = RMSprop(lr=lr, rho=rho)
 
     model.compile(loss='cosine_proximity', optimizer=optimizer, metrics=['acc'])
@@ -98,15 +104,15 @@ def create_model(kernel_initializer1=glorot_uniform(),
 
 
 def create_param_grid():
-    # optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam']
+    # optimizer = [SGD(), RMSprop(), Adagrad(), Adadelta(), Adam(), Adamax(), Nadam()]
     # lr = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.3]
     # rho = [0.1, 0.5, 0.9, 1.2, 1.5]
     kernel_initializer = [Zeros(), Ones(), Constant(), RandomNormal(), RandomUniform(), TruncatedNormal(),
-                          VarianceScaling(), Orthogonal(), Identity(), glorot_normal(), glorot_uniform(), he_normal(),
-                          lecun_normal(), he_uniform(), lecun_uniform(), ]
+                          VarianceScaling(), Orthogonal(), glorot_normal(), glorot_uniform(), he_normal(),
+                          lecun_normal(), he_uniform(), lecun_uniform()]
 
     return dict(
-        kernel_initializer1=kernel_initializer
+        kernel_initializer1=kernel_initializer,
     )
 
 

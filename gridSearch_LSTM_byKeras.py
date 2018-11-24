@@ -97,7 +97,6 @@ def create_param_grid():
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='LSTM by Keras')
-    parser.add_argument('-train', '--npz_train_file', help='学習npzファイル', required=True)
-    parser.add_argument('-test', '--npz_test_file', help='テストnpzファイル', required=True)
+    parser.add_argument('-t', '--npz_train_file', help='学習npzファイル', required=True)
     args = parser.parse_args()
     main()

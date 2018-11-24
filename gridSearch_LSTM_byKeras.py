@@ -24,7 +24,7 @@ def main():
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
     model = KerasClassifier(build_fn=create_model, epochs=3, verbose=0)
-    grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), cv=3)
+    grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), cv=3, n_jobs=-1)
     grid = grid.fit(train, labels)
 
     print(grid.best_params_)
@@ -68,7 +68,9 @@ def create_model(recurrent_activation1='hard_sigmoid',
                  recurrent_activation2='hard_sigmoid',
                  recurrent_activation3='hard_sigmoid',
                  recurrent_activation4='hard_sigmoid',
-                 optimizer='RMSprop'):
+                 optimizer='RMSprop',
+                 lr=0.001,
+                 rho=0.9):
     input_size = 644
     model = Sequential()
     model.add(
@@ -103,14 +105,21 @@ def create_model(recurrent_activation1='hard_sigmoid',
     model.add(Activation('sigmoid'))
     model.add(Dense(2))
     model.add(Activation('hard_sigmoid'))
+
+    if optimizer == 'RMSProp':
+        optimizer = RMSprop(lr=lr, rho=rho)
+
     model.compile(loss='cosine_proximity', optimizer=optimizer, metrics=['acc'])
     return model
 
 
 def create_param_grid():
-    optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam']
+    # optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam']
+    lr = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.3]
+    rho = [0.1, 0.5, 0.9, 1.2, 1.5]
     return dict(
-        optimizer=optimizer,
+        lr=lr,
+        rho=rho,
     )
 
 

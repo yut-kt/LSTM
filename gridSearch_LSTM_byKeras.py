@@ -11,6 +11,7 @@ from keras.optimizers import RMSprop
 from keras.preprocessing.text import Tokenizer
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
+from keras.initializers import *
 
 
 def main():
@@ -23,7 +24,7 @@ def main():
     max_length = max([len(sentence) for sentence in train_sentences])
     train = pad_sequences(sequences, max_length).reshape(len(train_sentences), 1, max_length)
 
-    model = KerasClassifier(build_fn=create_model, epochs=3, verbose=0)
+    model = KerasClassifier(build_fn=create_model, epochs=1, verbose=0)
     grid = GridSearchCV(estimator=model, param_grid=create_param_grid(), cv=3, n_jobs=-1)
     grid = grid.fit(train, labels)
 
@@ -36,10 +37,20 @@ def main():
         print("%f (%f) with: %r" % (mean, stdev, param))
 
 
-def create_model(recurrent_activation1='hard_sigmoid',
+def create_model(kernel_initializer1=glorot_uniform(),
+                 kernel_initializer2='glorot_uniform',
+                 kernel_initializer3='glorot_uniform',
+                 kernel_initializer4='glorot_uniform',
+                 kernel_initializer5='glorot_uniform',
+                 kernel_initializer6='glorot_uniform',
+                 kernel_initializer7='glorot_uniform',
+                 kernel_initializer8='glorot_uniform',
+
+                 recurrent_activation1='hard_sigmoid',
                  recurrent_activation2='hard_sigmoid',
                  recurrent_activation3='hard_sigmoid',
                  recurrent_activation4='hard_sigmoid',
+
                  optimizer='RMSprop',
                  lr=0.001,
                  rho=0.9):
@@ -50,6 +61,7 @@ def create_model(recurrent_activation1='hard_sigmoid',
              batch_input_shape=(None, 1, input_size),
              activation='softsign',
              recurrent_activation=recurrent_activation1,
+             kernel_initializer=kernel_initializer1,
              return_sequences=True))
     model.add(
         LSTM(100,
@@ -87,11 +99,14 @@ def create_model(recurrent_activation1='hard_sigmoid',
 
 def create_param_grid():
     # optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam']
-    lr = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.3]
-    rho = [0.1, 0.5, 0.9, 1.2, 1.5]
+    # lr = [0.0001, 0.001, 0.01, 0.1, 0.2, 0.3]
+    # rho = [0.1, 0.5, 0.9, 1.2, 1.5]
+    kernel_initializer = [Zeros(), Ones(), Constant(), RandomNormal(), RandomUniform(), TruncatedNormal(),
+                          VarianceScaling(), Orthogonal(), Identity(), glorot_normal(), glorot_uniform(), he_normal(),
+                          lecun_normal(), he_uniform(), lecun_uniform(), ]
+
     return dict(
-        lr=lr,
-        rho=rho,
+        kernel_initializer1=kernel_initializer
     )
 
 
